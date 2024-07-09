@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
-const SeatSchema = require("./seat.model");
 
 const DOCUMENT_NAME = "trip";
 const COLLECTION_NAME = "trips";
+
+const SeatSchema = new mongoose.Schema({
+  seatNumber: { type: String, required: true },
+  row: { type: String, enum: ["front", "middle", "back"], required: true },
+  deck: { type: String, enum: ["upper", "lower"], required: true },
+  available: { type: Boolean, required: true, default: true },
+});
 
 const TripSchema = new mongoose.Schema({
   departure: { type: String, required: true },
@@ -14,8 +20,29 @@ const TripSchema = new mongoose.Schema({
     enum: ["seat", "bed", "limousine"],
     required: true,
   },
-  seats: [{ type: mongoose.Schema.Types.ObjectId, ref: "Seat" }],
+  seats: [SeatSchema]
 });
+
+SeatSchema.methods.validation = function () {
+  const errors = {};
+  if (!this.row || !["front", "middle", "back"].includes(this.row)) {
+    errors.status = 400;
+    errors.message = "row must be one of 'front', 'middle', 'back'.";
+  }
+
+  if (!this.deck || !["upper", "lower"].includes(this.deck)) {
+    errors.status = 400;
+    errors.message = "deck must be either 'upper' or 'lower'.";
+  }
+
+  if (errors.status) {
+    const error = new Error(errors.message);
+    error.status = errors.status;
+    return error;
+  }
+
+  return null;
+};
 
 TripSchema.methods.validation = function () {
   const errors = {};

@@ -2,14 +2,23 @@ from faker import Faker
 import random
 import requests
 import json
+
 fake = Faker()
 
 def generate_trip_data(num_trips):
     trip_data = []
     
     vehicle_types = ["seat", "bed", "limousine"]
-    deck_choice = ["upper", "lower"]
     row_choice = ["front", "middle", "back"]
+    deck_choice = ["upper", "lower"]
+    seats_config = [
+        {"seatNumber": f"A{str(i).zfill(2)}", "deck": "lower", "row": "front" if i <= 5 else "middle" if i <= 11 else "back", "available": random.choice([True, False])}
+        for i in range(1, 18)
+    ] + [
+        {"seatNumber": f"B{str(i).zfill(2)}", "deck": "upper", "row": "front" if i <= 5 else "middle" if i <= 11 else "back", "available": random.choice([True, False])}
+        for i in range(1, 18)
+    ]
+    
     for _ in range(num_trips):
         start_date = fake.date_time_between(start_date='-1y', end_date='+1y')
         
@@ -19,33 +28,9 @@ def generate_trip_data(num_trips):
             "departureDate": start_date.strftime("%Y-%m-%d"),
             "departureTime": start_date.strftime("%H:%M:%S"),
             "vehicleType": random.choice(vehicle_types),
-            "seat":[
-                {
-                    "deck":random.choice(deck_choice),
-                    "row":random.choice(row_choice),
-                    "quantity":random.randint(5, 15),
-                    "available":random.choice([False,True]),
-                },
-                {
-                    "deck":random.choice(deck_choice),
-                    "row":random.choice(row_choice),
-                    "quantity":random.randint(5, 15),
-                    "available":random.choice([False,True]),
-                },
-                {
-                    "deck":random.choice(deck_choice),
-                    "row":random.choice(row_choice),
-                    "quantity":random.randint(5, 15),
-                    "available":random.choice([False,True]),
-                }
-            ]
+            "seats": seats_config
         }
-        # Xoá ngẫu nhiên 1 hoặc 2 ghế (Tuỳ)
-        num_to_remove = random.randint(1, 2)
-        for _ in range(num_to_remove):
-            if trip['seat']:
-                trip['seat'].pop(random.randrange(len(trip['seat'])))
-                print(trip)
+
         url = "http://127.0.0.1:5000/api/v1/trip"
         headers = {"Content-Type": "application/json"}
         response = requests.post(url, data=json.dumps(trip), headers=headers)
