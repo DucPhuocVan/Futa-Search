@@ -2,18 +2,40 @@ const TripService = require("../services/trip.services");
 
 class TripController {
   static Find = async (req, res, next) => {
-    const { departure, destination, departureDate } = req.query;
+    const { departure, destination, departureDate, departureTime } = req.query;
     if (!departure || !destination || !departureDate) {
       return res.status(400).json({ detail: "Missing data" });
     }
+
+    const departureTimeFilter = {
+      0: {
+        $and: [{ departureTime: { $gte: 0 } }, { departureTime: { $lt: 6 } }],
+      },
+      1: {
+        $and: [{ departureTime: { $gte: 6 } }, { departureTime: { $lt: 12 } }],
+      },
+
+      2: {
+        $and: [{ departureTime: { $gte: 12 } }, { departureTime: { $lt: 18 } }],
+      },
+
+      3: {
+        $and: [{ departureTime: { $gte: 18 } }, { departureTime: { $lt: 24 } }],
+      },
+    };
+
+    if (departureTime !== undefined)
+      var _departureTime = departureTimeFilter[departureTime];
+
     const metadata = await TripService.Find({
       departure,
       destination,
       departureDate,
+      _departureTime,
     });
     return res.status(200).json(metadata);
   };
-  
+
   static FindById = async (req, res, next) => {
     const id = req.params.id;
     const Trip = await TripService.FindById(id);
