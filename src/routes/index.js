@@ -6,7 +6,6 @@ const SeatController = require("../controllers/seat.controller");
 
 Router.post("/trip", handler(TripController.Create));
 Router.post("/seat", handler(SeatController.Create));
-Router.get("/trip/:id", handler(TripController.FindById));
 Router.get("/trip/search", handler(TripController.Find));
 
 module.exports = Router;

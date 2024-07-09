@@ -1,7 +1,18 @@
 const TripService = require("../services/trip.services");
 
 class TripController {
-  static Find = async (req, res, next) => {};
+  static Find = async (req, res, next) => {
+    const { departure, destination, departureDate } = req.query;
+    if (!departure || !destination || !departureDate) {
+      return res.status(400).json({ detail: "Missing data" });
+    }
+    const metadata = await TripService.Find({
+      departure,
+      destination,
+      departureDate,
+    });
+    return res.status(200).json(metadata);
+  };
   static FindById = async (req, res, next) => {
     const id = req.params.id;
     const Trip = await TripService.FindById(id);

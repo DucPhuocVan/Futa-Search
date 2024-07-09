@@ -1,5 +1,8 @@
 const TripModel = require("../models/trip.model");
 class TripService {
+  static Find = async (filter) => {
+    return await TripModel.find(filter);
+  };
   static FindById = async (id) => {
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
       return await TripModel.findById(id).lean();
