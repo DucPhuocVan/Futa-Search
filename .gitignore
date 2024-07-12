@@ -1,0 +1,5 @@
+node_modules
+mongodb
+database
+package-lock.json
+package.json

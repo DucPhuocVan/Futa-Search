@@ -1,0 +1,52 @@
+1. Đánh index
+db.trips.createIndex({departureDate: 1, departure: 1, destination: 1}, {name: "index"});
+
+2. Xoá index
+db.trips.dropIndex("index");
+
+3. Query
+db.trips.aggregate([
+  {
+    $match: {
+      departure: "Hồ Chí Minh",
+      destination: "Đà lạt",
+      departureDate: new Date("2024-07-12T00:00:00.000Z")
+    }
+  },
+  {
+    $addFields: {
+      availableSeatsCount: {
+        $size: {
+          $filter: {
+            input: "$seats",
+            as: "seat",
+            cond: { $eq: ["$$seat.available", true] }
+          }
+        }
+      }
+    }
+  },
+  {
+    $match: {
+      availableSeatsCount: { $gte: 4 }
+    }
+  }
+])
+.explain("executionStats")
+
+4. Kết quả
+4.1. No index
+return 2
+time 53
+scan 151172
+collscan
+
+4.2. index: departureDate, departure, destination
+return 2
+time 2
+scan 2
+IXSCAN
+
+
+
+
