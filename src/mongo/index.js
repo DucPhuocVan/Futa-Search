@@ -31,4 +31,7 @@ class Database {
 }
 
 const instance = Database.getInstance();
+
+mongoose.set("toJSON", { getters: true });
+
 module.exports = instance;

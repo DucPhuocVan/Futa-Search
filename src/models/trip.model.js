@@ -14,13 +14,17 @@ const TripSchema = new mongoose.Schema({
   departure: { type: String, required: true },
   destination: { type: String, required: true },
   departureDate: { type: Date, required: true },
-  departureTime: { type: String, required: true },
+  departureTime: {
+    type: String,
+    required: true,
+  },
   vehicleType: {
     type: String,
     enum: ["seat", "bed", "limousine"],
     required: true,
   },
-  seats: [SeatSchema]
+
+  seats: [SeatSchema],
 });
 
 SeatSchema.methods.validation = function () {

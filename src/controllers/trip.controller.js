@@ -1,39 +1,53 @@
+const { tr, de } = require("@faker-js/faker");
 const TripService = require("../services/trip.services");
 
 class TripController {
   static Find = async (req, res, next) => {
-    const { departure, destination, departureDate, departureTime } = req.query;
+    const {
+      departure,
+      destination,
+      departureDate,
+      departureTime,
+      vehicleType,
+      row,
+      deck,
+    } = req.query;
     if (!departure || !destination || !departureDate) {
       return res.status(400).json({ detail: "Missing data" });
     }
 
-    const departureTimeFilter = {
-      0: {
-        $and: [{ departureTime: { $gte: 0 } }, { departureTime: { $lt: 6 } }],
-      },
-      1: {
-        $and: [{ departureTime: { $gte: 6 } }, { departureTime: { $lt: 12 } }],
-      },
-
-      2: {
-        $and: [{ departureTime: { $gte: 12 } }, { departureTime: { $lt: 18 } }],
-      },
-
-      3: {
-        $and: [{ departureTime: { $gte: 18 } }, { departureTime: { $lt: 24 } }],
-      },
-    };
-
-    if (departureTime !== undefined)
-      var _departureTime = departureTimeFilter[departureTime];
-
-    const metadata = await TripService.Find({
+    let results = await TripService.Find({
       departure,
       destination,
       departureDate,
-      _departureTime,
+      vehicleType,
     });
-    return res.status(200).json(metadata);
+
+    results = results.map((trip) => {
+      let time = trip.departureTime.split(":")[0];
+      time = parseInt(time);
+      if (row) {
+        trip.seats = trip.seats.filter((seat) => seat.row === row);
+      }
+      if (deck) {
+        trip.seats = trip.seats.filter((seat) => seat.deck === deck);
+      }
+
+      if (departureTime && departureTime == 0 && time < 6 && time > 0) {
+        return trip;
+      }
+      if (departureTime && departureTime == 1 && time >= 6 && time < 12) {
+        return trip;
+      }
+      if (departureTime && departureTime == 2 && time >= 12 && time < 18) {
+        return trip;
+      }
+      if (departureTime && departureTime == 3 && time >= 18 && time <= 23) {
+        return trip;
+      }
+    });
+
+    return res.status(200).json(results);
   };
 
   static FindById = async (req, res, next) => {
